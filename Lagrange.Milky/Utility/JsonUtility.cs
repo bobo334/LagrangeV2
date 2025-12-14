@@ -134,6 +134,11 @@ public static partial class JsonUtility
     [JsonSerializable(typeof(GroupInvitationEvent))]
     // message_recall
     [JsonSerializable(typeof(MessageRecallEvent))]
+
+    // OneBot
+    [JsonSerializable(typeof(Lagrange.Milky.Entity.OneBot.OneBotPostEvent))]
+    [JsonSerializable(typeof(Lagrange.Milky.Entity.OneBot.OneBotApiResponse<object>))]
+    [JsonSerializable(typeof(System.Text.Json.JsonElement))]
     private partial class JsonContext : JsonSerializerContext;
 
     public static string Serialize<T>(T value) where T : class

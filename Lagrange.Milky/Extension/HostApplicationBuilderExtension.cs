@@ -152,5 +152,15 @@ public static class HostApplicationBuilderExtension
 
         if (configuration.EnabledWebSocket) services.AddHostedService<MilkyWebSocketEventService>();
         if (configuration.WebHook != null) services.AddHostedService<MilkyWebHookEventService>();
+
+        // OneBot v11
+        var onebot = builder.Configuration.GetSection("OneBot").Get<OneBotConfiguration>();
+        if (onebot != null)
+        {
+            services.Configure<OneBotConfiguration>(builder.Configuration.GetSection("OneBot"));
+            if (onebot.EnabledWebSocket) services.AddHostedService<OneBotWebSocketEventService>();
+            if (onebot.EnabledHttpApi) services.AddHostedService<OneBotHttpApiService>();
+            if (onebot.Reverse?.Enabled ?? false) services.AddHostedService<OneBotReverseWebSocketClientService>();
+        }
     });
 }

@@ -126,6 +126,30 @@ Current Milky version: [77c6cbd](https://github.com/SaltifyDev/milky/tree/77c6cb
 - [x] group_nudge
 - [ ] group_file_upload
 
+### OneBot v11
+
+- [ ] HTTP API (v11) basic compatibility (send_message, get_status)
+- [x] WebSocket forward (server) events
+
+Configuration example (enable forward WS + reverse client):
+
+```jsonc
+"OneBot": {
+  "EnabledHttpApi": true,
+  "EnabledWebSocket": true,
+  "Host": "127.0.0.1",
+  "Port": 8080,
+  "Prefix": "/onebot",
+  "AccessToken": null,
+  "Reverse": { "Enabled": true, "Url": "ws://127.0.0.1:6700" }
+}
+```
+
+Notes:
+- Reverse WS: connects to configured `Reverse.Url`, parses OneBot `post` events and injects into internal events (message, meta_event)
+- HTTP API: supports minimal `send_message`, `get_status`, `get_friend_list`, `get_group_list` mapping to existing Milky handlers
+
+
 ### segment
 
 #### incoming

@@ -90,4 +90,21 @@
         //     },
         // },
     },
+
+    // OneBot v11 configuration
+    // Example:
+    // "OneBot": {
+    //     "EnabledHttpApi": true,
+    //     "EnabledWebSocket": true,
+    //     "Host": "127.0.0.1",
+    //     "Port": 8080,
+    //     "Prefix": "/onebot",
+    //     "AccessToken": null,
+    //     "Reverse": {
+    //         "Enabled": false,
+    //         "Url": null,
+    //         "AccessToken": null
+    //     }
+    // }
 }
+
