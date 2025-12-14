@@ -108,4 +108,41 @@ public class EntityConvertOneBotTests
         var msgMA = ((Lagrange.Core.Events.EventArgs.BotMessageEvent)evMA).Message;
         Assert.Contains(msgMA.Entities, x => x is Lagrange.Core.Message.Entities.MentionEntity me && me.Uin == 0);
     }
+
+    [Fact]
+    public void Convert_Null_Edge_Cases()
+    {
+        var convert = new EntityConvert();
+
+        // BotOfflineEvent with null tips should round-trip and produce meta_event
+        var offlineNull = new Lagrange.Core.Events.EventArgs.BotOfflineEvent(Lagrange.Core.Events.EventArgs.BotOfflineEvent.Reasons.Disconnected, null);
+        var post = convert.ToOneBotPost(offlineNull);
+        Assert.Equal("meta_event", post.PostType);
+        Assert.True(post.RawEvent.HasValue);
+        if (post.RawEvent.HasValue)
+        {
+            var je = post.RawEvent.Value;
+            Assert.True(je.TryGetProperty("type", out var t) && t.GetString() == "offline");
+        }
+
+        var round = convert.FromOneBotPost(post, System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(post));
+        Assert.NotNull(round);
+        Assert.IsType<Lagrange.Core.Events.EventArgs.BotOfflineEvent>(round);
+        var bof = (Lagrange.Core.Events.EventArgs.BotOfflineEvent)round!;
+        Assert.Null(bof.Tips);
+
+        // Message post with missing message element -> should create empty-text message
+        var emptyMsgPost = new Lagrange.Milky.Entity.OneBot.OneBotPostEvent("message", DateTimeOffset.UtcNow.ToUnixTimeSeconds(), 1000, MessageType: "private", UserId: 42);
+        var em = convert.FromOneBotPost(emptyMsgPost, System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(emptyMsgPost));
+        Assert.NotNull(em);
+        Assert.IsType<Lagrange.Core.Events.EventArgs.BotMessageEvent>(em);
+        var m = ((Lagrange.Core.Events.EventArgs.BotMessageEvent)em).Message;
+        Assert.Contains(m.Entities, e => e is Lagrange.Core.Message.Entities.TextEntity te && te.Text == string.Empty);
+
+        // meta_event with unknown content -> should return null
+        var meta = System.Text.Json.JsonDocument.Parse("{ }");
+        var metaPost = new Lagrange.Milky.Entity.OneBot.OneBotPostEvent("meta_event", DateTimeOffset.UtcNow.ToUnixTimeSeconds(), 1000, RawEvent: meta.RootElement);
+        var unknown = convert.FromOneBotPost(metaPost, System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(metaPost));
+        Assert.Null(unknown);
+    }
 }

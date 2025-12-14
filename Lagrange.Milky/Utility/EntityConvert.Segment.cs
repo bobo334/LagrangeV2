@@ -128,7 +128,8 @@ public partial class EntityConvert
     private async Task<IMessageEntity> ReplyGroupSegmentAsync(ReplyOutgoingSegment reply, long uin, CancellationToken token)
     {
         long sequence = reply.Data.MessageSeq;
-        var message = await _cache.GetMessageAsync(MessageType.Group, uin, (ulong)sequence, token);
+        var cache = _cache ?? throw new InvalidOperationException("MessageCache is required to resolve reply segments");
+        var message = await cache.GetMessageAsync(MessageType.Group, uin, (ulong)sequence, token);
         if (message == null) throw new Exception("message not found");
 
         return new ReplyEntity(message);
@@ -136,7 +137,8 @@ public partial class EntityConvert
     private async Task<IMessageEntity> ReplyFriendSegmentAsync(ReplyOutgoingSegment reply, long uin, CancellationToken token)
     {
         long sequence = reply.Data.MessageSeq;
-        var message = await _cache.GetMessageAsync(MessageType.Private, uin, (ulong)sequence, token);
+        var cache = _cache ?? throw new InvalidOperationException("MessageCache is required to resolve reply segments");
+        var message = await cache.GetMessageAsync(MessageType.Private, uin, (ulong)sequence, token);
         if (message == null) throw new Exception("message not found");
 
         return new ReplyEntity(message);
