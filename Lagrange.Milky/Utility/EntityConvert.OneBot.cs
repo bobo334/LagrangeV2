@@ -43,8 +43,7 @@ public partial class EntityConvert
                                 break;
                             case Lagrange.Core.Message.Entities.RecordEntity record:
                                 segs.Add(new { type = "record", data = new { summary = record.ToPreviewString() } });
-                                break;
-                                break;
+                                        break;
                             default:
                                 segs.Add(new { type = "text", data = new { text = ent.ToString() } });
                                 break;
@@ -57,7 +56,7 @@ public partial class EntityConvert
                 }
                 catch { messageElement = null; }
 
-                long selfId = _bot.BotUin;
+                long selfId = _bot?.BotUin ?? 0;
                 return new OneBotPostEvent(
                     PostType: "message",
                     Time: new DateTimeOffset(msgEvent.Message.Time).ToUnixTimeSeconds(),
@@ -242,11 +241,11 @@ public partial class EntityConvert
                         if (je.TryGetProperty("type", out var t))
                         {
                             var type = t.GetString();
-                            if (type == "offline")
-                            {
-                                var reason = Lagrange.Core.Events.EventArgs.BotOfflineEvent.Reasons.Disconnected;
-                                return new Lagrange.Core.Events.EventArgs.BotOfflineEvent(reason, (null, null));
-                            }
+                                if (type == "offline")
+                                {
+                                    var reason = Lagrange.Core.Events.EventArgs.BotOfflineEvent.Reasons.Disconnected;
+                                    return new Lagrange.Core.Events.EventArgs.BotOfflineEvent(reason, null);
+                                }
                             else if (type == "group_increase" || type == "group_decrease")
                             {
                                 // Try extract common fields

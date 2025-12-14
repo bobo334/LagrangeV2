@@ -16,12 +16,12 @@ public partial class EntityConvert
     };
 
     public FriendMessage FriendMessage(BotMessage message) => new(
-        message.Contact.Uin == _bot.BotUin ? message.Receiver.Uin : message.Contact.Uin,
+        message.Contact.Uin == (_bot?.BotUin ?? 0) ? message.Receiver.Uin : message.Contact.Uin,
         (long)message.ClientSequence,
         message.Contact.Uin,
         message.Time.ToUnixTimeSeconds(),
         Segments(message.Entities),
-        Friend((BotFriend)message.Contact)
+        Friend((BotFriend)message.Contact!)
     );
 
     public GroupMessage GroupMessage(BotMessage message) => new(
@@ -30,12 +30,12 @@ public partial class EntityConvert
         message.Contact.Uin,
         message.Time.ToUnixTimeSeconds(),
         Segments(message.Entities),
-        Group(((BotGroupMember)message.Contact).Group),
-        GroupMember((BotGroupMember)message.Contact)
+        Group(((BotGroupMember)message.Contact).Group!),
+        GroupMember((BotGroupMember)message.Contact!)
     );
 
     public TempMessage TempMessage(BotMessage message) => new(
-        message.Contact.Uin == _bot.BotUin ? message.Receiver.Uin : message.Contact.Uin,
+        message.Contact.Uin == (_bot?.BotUin ?? 0) ? message.Receiver.Uin : message.Contact.Uin,
         (long)message.Sequence,
         message.Contact.Uin,
         message.Time.ToUnixTimeSeconds(),

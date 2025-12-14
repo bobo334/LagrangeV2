@@ -40,12 +40,12 @@ public class OneBotReverseWebSocketClientService(ILogger<OneBotReverseWebSocketC
 
                     if (!string.IsNullOrEmpty(_options.Reverse?.AccessToken))
                     {
-                        ws.Options.SetRequestHeader("Authorization", $"Bearer {_options.Reverse.AccessToken}");
+                        ws.Options.SetRequestHeader("Authorization", $"Bearer {_options.Reverse!.AccessToken!}");
                     }
 
-                    await ws.ConnectAsync(new Uri(_options.Reverse.Url), token);
+                    await ws.ConnectAsync(new Uri(_options.Reverse!.Url!), token);
 
-                    _logger.LogConnected(_options.Reverse.Url);
+                    _logger.LogConnected(_options.Reverse!.Url!);
 
                 byte[] buffer = new byte[4096];
                 while (ws.State == WebSocketState.Open && !token.IsCancellationRequested)
@@ -67,7 +67,7 @@ public class OneBotReverseWebSocketClientService(ILogger<OneBotReverseWebSocketC
                         if (post != null)
                         {
                             var ev = new EntityConvert(_bot, _cache, _resolver).FromOneBotPost(post, bytes);
-                            if (ev != null) _bot.EventInvoker.PostEvent((dynamic)ev);
+                            if (ev != null) _bot.EventInvoker.PostEvent(ev);
                         }
                     }
                     catch (Exception e)

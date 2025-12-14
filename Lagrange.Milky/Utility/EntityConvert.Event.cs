@@ -8,25 +8,25 @@ public partial class EntityConvert
 {
     public BotOfflineEvent BotOfflineEvent(LgrEventArgs.BotOfflineEvent @event) => new(
         @event.EventTime.ToUnixTimeSeconds(),
-        _bot.BotUin,
+        _bot?.BotUin ?? 0,
         new BotOfflineEventData($"{@event.Reason} {@event.Tips?.Tag} {@event.Tips?.Message}")
     );
 
     public MessageReceiveEvent MessageReceiveEvent(LgrEventArgs.BotMessageEvent @event) => new(
         @event.Message.Time.ToUnixTimeSeconds(),
-        _bot.BotUin,
+        _bot?.BotUin ?? 0,
         MessageBase(@event.Message)
     );
 
     public GroupNudgeEvent GroupNudgeEvent(LgrEventArgs.BotGroupNudgeEvent @event) => new(
         @event.EventTime.ToUnixTimeSeconds(),
-        _bot.BotUin,
+        _bot?.BotUin ?? 0,
         new GroupNudgeEventData(@event.GroupUin, @event.OperatorUin, @event.TargetUin, @event.Action, @event.Suffix, @event.ActionImageUrl)
     );
 
     public GroupMemberIncreaseEvent GroupMemberIncreaseEvent(LgrEventArgs.BotGroupMemberIncreaseEvent @event) => new(
         @event.EventTime.ToUnixTimeSeconds(),
-        _bot.BotUin,
+        _bot?.BotUin ?? 0,
         new GroupMemberIncreaseEventData(
             @event.GroupUin,
             @event.MemberUin,
@@ -37,7 +37,7 @@ public partial class EntityConvert
 
     public GroupMemberDecreaseEvent GroupMemberDecreaseEvent(LgrEventArgs.BotGroupMemberDecreaseEvent @event) => new(
         @event.EventTime.ToUnixTimeSeconds(),
-        _bot.BotUin,
+        _bot?.BotUin ?? 0,
         new GroupMemberDecreaseEventData(
             @event.GroupUin,
             @event.UserUin,
@@ -47,7 +47,7 @@ public partial class EntityConvert
 
     public FriendRequestEvent FriendRequestEvent(LgrEventArgs.BotFriendRequestEvent @event) => new(
         @event.EventTime.ToUnixTimeSeconds(),
-        _bot.BotUin,
+        _bot?.BotUin ?? 0,
         new FriendRequestEventData(
             @event.InitiatorUid,
             @event.InitiatorUin,
@@ -58,7 +58,7 @@ public partial class EntityConvert
 
     public MessageRecallEvent MessageRecallEvent(LgrEventArgs.BotGroupRecallEvent @event) => new(
         @event.EventTime.ToUnixTimeSeconds(),
-        _bot.BotUin,
+        _bot?.BotUin ?? 0,
         new MessageRecallEventData(
             "group",
             @event.GroupUin,
@@ -70,7 +70,7 @@ public partial class EntityConvert
     );
     public MessageRecallEvent MessageRecallEvent(LgrEventArgs.BotFriendRecallEvent @event) => new(
         @event.EventTime.ToUnixTimeSeconds(),
-        _bot.BotUin,
+        _bot?.BotUin ?? 0,
         new MessageRecallEventData(
             "friend",
             @event.PeerUin,

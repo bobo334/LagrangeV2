@@ -81,6 +81,35 @@ public sealed class EventInvoker(BotContext context) : IDisposable
         }
     });
 
+    public void PostEvent(EventBase ev) => Task.Run(async () =>
+    {
+        await context.EventContext.HandleOutgoingEvent(ev);
+
+        try
+        {
+            var t = ev.GetType();
+
+            if (_syncHandlers.TryGetValue(t, out var @delegate) && @delegate is not null)
+            {
+                ((Action<BotContext, EventBase>)@delegate).Invoke(context, ev);
+            }
+
+            if (_asyncHandlers.TryGetValue(t, out var asyncDelegate) && asyncDelegate is not null)
+            {
+                await ((Func<BotContext, EventBase, Task>)asyncDelegate)(context, ev);
+            }
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            if (ev.GetType() == typeof(BotLogEvent))
+            {
+                Console.WriteLine($"Failed to post event: {ev}");
+                return;
+            }
+            PostEvent(new BotLogEvent(Tag, LogLevel.Error, ex.ToString(), ex));
+        }
+    });
+
     public void Dispose()
     {
         _syncHandlers.Clear();
