@@ -54,7 +54,7 @@ public sealed class EventInvoker(BotContext context) : IDisposable
         _asyncHandlers.TryRemove(typeof(TEvent), out _);
     }
 
-    internal void PostEvent<T>(T ev) where T : EventBase => Task.Run(async () =>
+    public void PostEvent<T>(T ev) where T : EventBase => Task.Run(async () =>
     {
         await context.EventContext.HandleOutgoingEvent(ev);
 

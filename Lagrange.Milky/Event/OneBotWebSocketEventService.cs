@@ -344,7 +344,7 @@ public class OneBotWebSocketEventService(ILogger<OneBotWebSocketEventService> lo
             await output.WriteAsync(Encoding.UTF8.GetBytes($"{code} {status}"), token);
             response.Close();
 
-            _logger.LogSend(identifier, remote, status);
+            _logger.LogSend(Encoding.UTF8.GetBytes($"{code} {status}"));
         }
         catch (Exception e)
         {

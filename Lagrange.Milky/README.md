@@ -128,10 +128,11 @@ Current Milky version: [77c6cbd](https://github.com/SaltifyDev/milky/tree/77c6cb
 
 ### OneBot v11
 
-- [ ] HTTP API (v11) basic compatibility (send_message, get_status)
+- [x] HTTP API (v11) basic compatibility (send_message, get_status, get_message, delete_msg/recall)
 - [x] WebSocket forward (server) events
+- [x] WebSocket reverse (client) events
 
-Configuration example (enable forward WS + reverse client):
+Configuration example (enable forward WS + reverse client + HTTP API):
 
 ```jsonc
 "OneBot": {
@@ -141,13 +142,14 @@ Configuration example (enable forward WS + reverse client):
   "Port": 8080,
   "Prefix": "/onebot",
   "AccessToken": null,
-  "Reverse": { "Enabled": true, "Url": "ws://127.0.0.1:6700" }
+  "Reverse": { "Enabled": true, "Url": "ws://127.0.0.1:6700", "AccessToken": null }
 }
 ```
 
 Notes:
 - Reverse WS: connects to configured `Reverse.Url`, parses OneBot `post` events and injects into internal events (message, meta_event)
-- HTTP API: supports minimal `send_message`, `get_status`, `get_friend_list`, `get_group_list` mapping to existing Milky handlers
+- HTTP API: supports `send_message`, `get_status`, `get_message`, `delete_msg`/`delete_message` (recall), `get_friend_list`, `get_group_list` mapping to existing Milky handlers
+- Access token: set `AccessToken` to enable Authorization header checks (Bearer token for WS, access_token query or Authorization header for HTTP)
 
 
 ### segment

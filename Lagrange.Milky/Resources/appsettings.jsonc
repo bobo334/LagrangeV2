@@ -93,18 +93,36 @@
 
     // OneBot v11 configuration
     // Example:
-    // "OneBot": {
-    //     "EnabledHttpApi": true,
-    //     "EnabledWebSocket": true,
-    //     "Host": "127.0.0.1",
-    //     "Port": 8080,
-    //     "Prefix": "/onebot",
-    //     "AccessToken": null,
-    //     "Reverse": {
-    //         "Enabled": false,
-    //         "Url": null,
-    //         "AccessToken": null
-    //     }
-    // }
+    "OneBot": {
+        // Enable OneBot HTTP API (v11)
+        "EnabledHttpApi": true,
+
+        // Enable OneBot WebSocket forward (server) events
+        "EnabledWebSocket": true,
+
+        // Host to listen on
+        "Host": "127.0.0.1",
+
+        // Port to listen on
+        "Port": 8080,
+
+        // Path prefix for OneBot endpoints
+        "Prefix": "/onebot",
+
+        // Access token for OneBot services (set to null to disable)
+        "AccessToken": null,
+
+        // Reverse WebSocket client configuration
+        "Reverse": {
+            // Enable reverse WebSocket client
+            "Enabled": false,
+
+            // URL to connect to (e.g., "ws://127.0.0.1:6700")
+            "Url": null,
+
+            // Access token for reverse WebSocket (sent as Authorization: Bearer <token>)
+            "AccessToken": null
+        }
+    }
 }
 

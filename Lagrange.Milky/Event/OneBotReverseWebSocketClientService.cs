@@ -1,18 +1,22 @@
 using System.Net.WebSockets;
 using System.Text;
 using Lagrange.Milky.Configuration;
+using Lagrange.Milky.Utility;
+using Lagrange.Core;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Lagrange.Milky.Event;
 
-public class OneBotReverseWebSocketClientService(ILogger<OneBotReverseWebSocketClientService> logger, IOptions<OneBotConfiguration> options, BotContext bot) : IHostedService
+public class OneBotReverseWebSocketClientService(ILogger<OneBotReverseWebSocketClientService> logger, IOptions<OneBotConfiguration> options, BotContext bot, Lagrange.Milky.Cache.MessageCache cache, ResourceResolver resolver) : IHostedService
 {
     private readonly ILogger<OneBotReverseWebSocketClientService> _logger = logger;
 
     private readonly OneBotConfiguration _options = options.Value;
     private readonly BotContext _bot = bot;
+    private readonly Lagrange.Milky.Cache.MessageCache _cache = cache;
+    private readonly ResourceResolver _resolver = resolver;
 
     private CancellationTokenSource? _cts;
     private Task? _task;
@@ -62,7 +66,7 @@ public class OneBotReverseWebSocketClientService(ILogger<OneBotReverseWebSocketC
                         var post = JsonUtility.Deserialize<Lagrange.Milky.Entity.OneBot.OneBotPostEvent>(bytes);
                         if (post != null)
                         {
-                            var ev = new EntityConvert().FromOneBotPost(post, bytes);
+                            var ev = new EntityConvert(_bot, _cache, _resolver).FromOneBotPost(post, bytes);
                             if (ev != null) _bot.EventInvoker.PostEvent((dynamic)ev);
                         }
                     }

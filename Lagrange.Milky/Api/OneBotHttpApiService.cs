@@ -6,6 +6,8 @@ using Lagrange.Milky.Utility;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Lagrange.Core;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Lagrange.Milky.Api;
 
@@ -136,7 +138,7 @@ public class OneBotHttpApiService(ILogger<OneBotHttpApiService> logger, IOptions
         return false;
     }
 
-    private async Task<T?> GetParameterAsync<T>(HttpListenerContext context, CancellationToken token)
+    private async Task<T?> GetParameterAsync<T>(HttpListenerContext context, CancellationToken token) where T : class
     {
         var request = context.Request;
         var identifier = request.RequestTraceIdentifier;
@@ -172,18 +174,18 @@ public class OneBotHttpApiService(ILogger<OneBotHttpApiService> logger, IOptions
             if (request.Params.MessageType == "group")
             {
                 var apiHandler = services.GetService<Lagrange.Milky.Api.Handler.Message.SendGroupMessageHandler>();
-                if (apiHandler == null) throw new Exception("SendGroupMessageHandler not available");
+                if (apiHandler == null) throw new System.Exception("SendGroupMessageHandler not available");
 
-                var param = new Lagrange.Milky.Api.Handler.Message.SendGroupMessageParameter(request.Params.TargetId, new[] { new Lagrange.Milky.Entity.Segment.TextOutgoingSegment(new Lagrange.Milky.Entity.Segment.TextSegmentData(request.Params.Message)) });
+                var param = new Lagrange.Milky.Api.Handler.Message.SendGroupMessageParameter(request.Params.TargetId, new[] { new Lagrange.Milky.Entity.Segment.TextOutgoingSegment(new Lagrange.Milky.Entity.Segment.TextSegmentData(request.Params.Message)) { Data = new Lagrange.Milky.Entity.Segment.TextSegmentData(request.Params.Message) } });
                 var result = await apiHandler.HandleAsync(param, token);
                 return result;
             }
             else
             {
                 var apiHandler = _services.CreateScope().ServiceProvider.GetService<Lagrange.Milky.Api.Handler.Message.SendPrivateMessageHandler>();
-                if (apiHandler == null) throw new Exception("SendPrivateMessageHandler not available");
+                if (apiHandler == null) throw new System.Exception("SendPrivateMessageHandler not available");
 
-                var param = new Lagrange.Milky.Api.Handler.Message.SendPrivateMessageParameter(request.Params.TargetId, new[] { new Lagrange.Milky.Entity.Segment.TextOutgoingSegment(new Lagrange.Milky.Entity.Segment.TextSegmentData(request.Params.Message)) });
+                var param = new Lagrange.Milky.Api.Handler.Message.SendPrivateMessageParameter(request.Params.TargetId, new[] { new Lagrange.Milky.Entity.Segment.TextOutgoingSegment(new Lagrange.Milky.Entity.Segment.TextSegmentData(request.Params.Message)) { Data = new Lagrange.Milky.Entity.Segment.TextSegmentData(request.Params.Message) } });
                 var result = await apiHandler.HandleAsync(param, token);
                 return result;
             }
@@ -195,12 +197,47 @@ public class OneBotHttpApiService(ILogger<OneBotHttpApiService> logger, IOptions
             return new { status = bot.IsOnline ? "online" : "offline", self_id = bot.BotUin };
         }
 
+        if (request.Api == "get_message")
+        {
+            var svc = _services.CreateScope().ServiceProvider;
+            var handler = svc.GetService<Lagrange.Milky.Api.Handler.Message.GetMessageHandler>();
+            if (handler == null) throw new System.Exception("GetMessageHandler not available");
+
+            var scene = request.Params.MessageType == "group" ? "group" : "friend";
+            var param = new Lagrange.Milky.Api.Handler.Message.GetMessageParameter(scene, request.Params.TargetId, request.Params.MessageSeq);
+            var result = await handler.HandleAsync(param, token);
+            return result;
+        }
+
+        if (request.Api == "delete_msg" || request.Api == "delete_message" || request.Api == "recall_message")
+        {
+            var svc = _services.CreateScope().ServiceProvider;
+            if (request.Params.MessageType == "group")
+            {
+                var handler = svc.GetService<Lagrange.Milky.Api.Handler.Message.RecallGroupMessageHandler>();
+                if (handler == null) throw new System.Exception("RecallGroupMessageHandler not available");
+
+                var param = new Lagrange.Milky.Api.Handler.Message.RecallGroupMessageParameter(request.Params.TargetId, request.Params.MessageSeq);
+                await handler.HandleAsync(param, token);
+                return new { message = "ok" };
+            }
+            else
+            {
+                var handler = svc.GetService<Lagrange.Milky.Api.Handler.Message.RecallPrivateMessageHandler>();
+                if (handler == null) throw new System.Exception("RecallPrivateMessageHandler not available");
+
+                var param = new Lagrange.Milky.Api.Handler.Message.RecallPrivateMessageParameter(request.Params.TargetId, request.Params.MessageSeq);
+                await handler.HandleAsync(param, token);
+                return new { message = "ok" };
+            }
+        }
+
         if (request.Api == "get_friend_list")
         {
             var svc = _services.CreateScope().ServiceProvider;
             var handler = svc.GetService<Lagrange.Milky.Api.Handler.System.GetFriendListHandler>();
             var param = new Lagrange.Milky.Api.Handler.System.GetFriendListParameter(false);
-            if (handler == null) throw new Exception("GetFriendListHandler not available");
+            if (handler == null) throw new System.Exception("GetFriendListHandler not available");
             var result = await handler.HandleAsync(param, token);
             return result;
         }
@@ -209,7 +246,7 @@ public class OneBotHttpApiService(ILogger<OneBotHttpApiService> logger, IOptions
         {
             var svc = _services.CreateScope().ServiceProvider;
             var handler = svc.GetService<Lagrange.Milky.Api.Handler.System.GetGroupListHandler>();
-            if (handler == null) throw new Exception("GetGroupListHandler not available");
+            if (handler == null) throw new System.Exception("GetGroupListHandler not available");
             var param = new Lagrange.Milky.Api.Handler.System.GetGroupListParameter(false);
             var result = await handler.HandleAsync(param, token);
             return result;
@@ -279,6 +316,9 @@ public class OneBotHttpApiService(ILogger<OneBotHttpApiService> logger, IOptions
         public string MessageType { get; set; } = "private";
         public long TargetId { get; set; }
         public string Message { get; set; } = string.Empty;
+        public long MessageSeq { get; set; }
+        public long MessageId { get; set; }
+        public string? MessageScene { get; set; }
     }
 }
 
